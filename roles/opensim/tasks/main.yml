@@ -1,0 +1,111 @@
+---
+- name: Download the latest version of OpenSimulator
+  copy:
+    src: opensim-latest.tgz
+    dest: /tmp/opensim-latest.tgz
+    owner: robust
+    group: opensim
+- name: Ensure grid folder exists
+  file:
+    path: /home/robust/grid/bin
+    owner: robust
+    group: opensim
+    state: directory
+    mode: 0755
+- name: Unpack the latest OpenSimulator (Robust)
+  unarchive:
+    src: /tmp/opensim-latest.tgz
+    dest: /home/robust/grid
+    creates: /home/robust/grid/bin
+    owner: robust
+    group: opensim
+    remote_src: yes
+- name: Copy over robust configuration file
+  copy:
+    src: Robust.HG.ini
+    dest: /home/robust/grid/bin/Robust.HG.ini
+    owner: robust
+    group: opensim
+- name: Update Robust Configuration with constant (1/3)
+  ini_file:
+    path: /home/robust/grid/bin/Robust.HG.ini
+    section: Const
+    option: BaseURL
+    value: "http://{{ full_domain }}/"
+- name: Update Robust Configuration with constant (2/3)
+  ini_file:
+    path: /home/robust/grid/bin/Robust.HG.ini
+    section: Const
+    option: PublicPort
+    value: '{{ grid_public_port }}'
+- name: Update Robust Configuration with constant (3/3)
+  ini_file:
+    path: /home/robust/grid/bin/Robust.HG.ini
+    section: Const
+    option: PrivatePort
+    value: '{{ grid_private_port }}'
+- name: Update Robust.HG.ini with database information
+  become_user: robust
+  ini_file:
+    path: /home/robust/grid/bin/Robust.HG.ini
+    section: DatabaseService
+    option: ConnectionString
+    value: "Data Source=localhost;Database=grid;User ID=opensim;Password={{ opensim_db_password }};Old Guids=true;"
+
+- name: Ensure node1 folder exists
+  file:
+    path: /home/simulators/node1
+    owner: simulators
+    group: opensim
+    state: directory
+    mode: 0755
+- name: Unpack the latest OpenSimulator (Simulators)
+  unarchive:
+    src: /tmp/opensim-latest.tgz
+    dest: /home/simulators/node1
+    creates: /home/simulators/node1/bin
+    owner: simulators
+    group: opensim
+    remote_src: yes
+- name: Copy Regions file
+  copy:
+    src: Regions.ini
+    dest: /home/simulators/node1/bin/Regions/Regions.ini
+    owner: simulators
+    group: opensim
+- name: Copy OpenSim configuration
+  copy:
+    src: OpenSim.ini
+    dest: /home/simulators/node1/bin/OpenSim.ini
+    owner: simulators
+    group: opensim
+- name: Copy GridCommon.ini
+  copy:
+    src: GridCommon.ini
+    dest: /home/simulators/node1/bin/config-include/GridCommon.ini
+    owner: simulators
+    group: opensim
+- name: Update OpenSim Configuration with constant (1/3)
+  ini_file:
+    path: /home/simulators/node1/bin/OpenSim.ini
+    section: Const
+    option: BaseHostname
+    value: '{{ full_domain }}'
+- name: Update OpenSim Configuration with constant (2/3)
+  ini_file:
+    path: /home/simulators/node1/bin/OpenSim.ini
+    section: Const
+    option: PublicPort
+    value: '{{ grid_public_port }}'
+- name: Update OpenSim Configuration with constant (3/3)
+  ini_file:
+    path: /home/simulators/node1/bin/OpenSim.ini
+    section: Const
+    option: PrivatePort
+    value: '{{ grid_private_port }}'
+- name: Update GridCommon Database information
+  ini_file:
+    path: /home/simulators/node1/bin/config-include/GridCommon.ini
+    section: DatabaseService
+    option: ConnectionString
+    value: "Data Source=localhost;Database=simulators;User ID=opensim;Password={{ opensim_db_password }};Old Guids=true;"

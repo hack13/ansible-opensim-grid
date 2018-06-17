@@ -1,0 +1,32 @@
+---
+- name: Removing anonymous users
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+
+- name: Create grid database
+  mysql_db:
+    name: grid
+    state: present
+
+- name: Create simulators database
+  mysql_db:
+    name: simulators
+    state: present
+
+- name: Create opensim and granting permissions (1/2)
+  mysql_user:
+    name: opensim
+    password: "{{ opensim_db_password }}"
+    priv: 'grid.*:ALL'
+    state: present 
+
+- name: Create opensim and granting permissions (2/2)
+  mysql_user:
+    name: opensim
+    append_privs: true
+    priv: 'simulators.*:ALL'
+    state: present 
+
+  

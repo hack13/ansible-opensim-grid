@@ -1,0 +1,12 @@
+- name: Install and Configure OpenSimulator in Grid Mode
+  hosts: opensim
+  remote_user: root
+  # remote_user: user
+  # become: yes
+  # become_user: root
+  # become_method: sudo
+
+  roles:
+    - system
+    - mysql
+    - opensim

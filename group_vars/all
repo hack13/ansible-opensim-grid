@@ -1,0 +1,5 @@
+---
+full_domain: 'grid.example.com'
+grid_public_port: 8002
+grid_private_port: 8003
+opensim_db_password: 'SomethingDifferent'

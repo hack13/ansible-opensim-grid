@@ -1,0 +1,92 @@
+---
+- name: Disable SELinux
+  selinux:
+    state: disabled
+- name: Add MariaDB 10.3 Repo
+  yum_repository:
+    name: mariadb
+    description: mariadb 10.3 official repo
+    baseurl: http://yum.mariadb.org/10.3/centos7-amd64
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+    gpgcheck: yes
+    enabled: yes
+- name: Import Mono-Project Key
+  rpm_key:
+    state: present
+    key: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+- name: Add Mono-Project Repo
+  yum_repository:
+    name: mono-centos7-stable
+    description: official mono project repo
+    baseurl: https://download.mono-project.com/repo/centos7-stable/
+    gpgkey: https://download.mono-project.com/repo/xamarin.gpg
+    gpgcheck: yes
+    enabled: yes
+- name: Refresh repos and upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+- name: Install git
+  yum:
+    name: git-core
+    state: latest
+- name: Install MariaDB Server
+  yum:
+    name: MariaDB-server, MariaDB-client, MySQL-python
+    state: latest
+- name: Install Mono
+  yum:
+    name: mono-complete
+    state: latest
+- name: Install firewalld
+  yum:
+    name: firewalld
+    state: latest
+- name: Create opensim user group
+  group:
+    name: opensim
+    state: present
+- name: Create robust account
+  user:
+    name: robust
+    shell: /bin/bash
+    comment: Robust Service Account
+    uid: 1090
+    group: opensim
+- name: Create simulators account
+  user:
+    name: simulators
+    shell: /bin/bash
+    comment: Simulators Service Account
+    uid: 1091
+    group: opensim
+- name: Configuring firewall rules for server (1/5)
+  firewalld:
+    port: 8002-8003/tcp
+    permanent: true
+    state: enabled
+- name: Configuring firewall rules for server (2/5)
+  firewalld:
+    port: 8002-8003/udp
+    permanent: true
+    state: enabled
+- name: Configuring firewall rules for server (3/5)
+  firewalld:
+    service: ssh
+    permanent: true
+    state: enabled
+- name: Configuring firewall rules for server (4/5)
+  firewalld:
+    port: 9000-9010/udp
+    permanent: true
+    state: enabled
+- name: Configuring firewall rules for server (5/5)
+  firewalld:
+    port: 9000-9010/tcp
+    permanent: true
+    state: enabled
+- name: restart firewalld
+  systemd:
+    name: firewalld.service
+    state: restarted
+    enabled: True
